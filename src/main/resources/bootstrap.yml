@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    consul:
+      host: internal-host
+      port: 30199
+      config:
+        acl-token: ***REMOVED***
+        profile-separator: "/"
+        enabled: false
+        fail-fast: false
+        prefix: "config/local"
+  application:
+    name: virtual-accounts/bootstrap

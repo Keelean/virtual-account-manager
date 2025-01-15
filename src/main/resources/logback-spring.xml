@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <property resource="application.properties" />
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="STDOUT">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.example.platform.auditlog.masking.MaskingPatternLayout">
+<!--                <maskPattern>${logging.mask.patterns.regexp}</maskPattern>-->
+                <pattern>%date %magenta([%thread]) %green(traceId:[%X{x-request-id}]) %highlight(%-5level) %logger{36}#%line -> %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender class="io.sentry.logback.SentryAppender" name="SENTRY">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="SENTRY"/>
+    </root>
+</configuration>
