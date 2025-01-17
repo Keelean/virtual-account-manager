@@ -22,13 +22,10 @@ public class VirtualAccountPool extends AbstractBaseAuditableEntity {
     @Enumerated(value = EnumType.STRING)
     private AccountCapacity capacity;
 
-    private Integer totalUsableDigits;
-    private Integer prefixSeries;
+    private Integer prefixSeries; //should only contain 2 digits, 50, 51, etc
     private Integer prefixEndSeries;
-    private Integer currentPrefix;
     private Integer startPrefix;
     private Integer currentSequence;
-    private Integer maximumRange;
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private State state = State.OPEN;

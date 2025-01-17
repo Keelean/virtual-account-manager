@@ -26,10 +26,9 @@ public class VirtualAccountCustomer extends AbstractBaseAuditableEntity {
     private String accountId;
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
-    private String partnerId;
+    private Long partnerConfigId; // reference to VirtualAccountPartnerConfig -> id
     private String referenceId;
     private LocalDateTime expiryDate;
-    private String invoicePaymentRef;
     @Enumerated(EnumType.STRING)
     private AccountMode mode;
 

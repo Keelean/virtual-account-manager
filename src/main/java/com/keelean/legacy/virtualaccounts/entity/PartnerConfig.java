@@ -27,4 +27,6 @@ public class PartnerConfig {
     private Integer minMultiplier;
     private Integer maxMultiplier;
     private boolean exactPayment;
+    private String settlementProductCode; //TODO: This should be an enum to reflect product code as on properties: va-partner.settlement.product-code,
+    private Integer coolDownPeriod; //store per partner cooldown period
 }
