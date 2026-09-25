@@ -4,6 +4,7 @@ package com.keelean.accountmanager.entity;
 import com.keelean.accountmanager.enums.AccountType;
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -14,7 +15,10 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @ToString
-public class AccountMeta {
+// Stored as jsonb; Hypersistence Utils deep-copies JSON attributes via Java serialization
+public class AccountMeta implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String accountName;
     private BigDecimal amount;
