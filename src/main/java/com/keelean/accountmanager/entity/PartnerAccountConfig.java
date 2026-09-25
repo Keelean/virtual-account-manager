@@ -3,16 +3,14 @@ package com.keelean.accountmanager.entity;
 
 import com.keelean.accountmanager.enums.AccountCapacity;
 import com.keelean.accountmanager.enums.ConfigStatus;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -22,7 +20,6 @@ import java.util.Objects;
 @Setter
 @Entity
 @Builder
-@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @ToString
 public class PartnerAccountConfig extends AbstractBaseAuditableEntity {
 
@@ -35,7 +32,7 @@ public class PartnerAccountConfig extends AbstractBaseAuditableEntity {
     private AccountCapacity capacity;
     private Integer currentSequence;
 
-    @Type(type = "jsonb")
+    @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
     private PartnerAccountConfigMeta meta;
 

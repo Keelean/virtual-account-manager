@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang.StringUtils;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 @AllArgsConstructor

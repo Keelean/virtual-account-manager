@@ -2,7 +2,7 @@ package com.keelean.accountmanager.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

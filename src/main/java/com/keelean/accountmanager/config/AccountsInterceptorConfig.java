@@ -22,7 +22,6 @@ public class AccountsInterceptorConfig implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
     registry.addResourceHandler(AppConstants.WEB_JARS_PATH).addResourceLocations("classpath:/META-INF/resources/webjars/");
 
     if (!registry.hasMappingForPattern(AppConstants.WEB_JARS_PATH)) {
