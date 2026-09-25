@@ -9,9 +9,9 @@
         <relativePath />
     </parent>
     <groupId>com.keelean</groupId>
-    <artifactId>account-manager</artifactId>
+    <artifactId>virtual-account-manager</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>account-manager</name>
+    <name>virtual-account-manager</name>
     <description>Service for managing accounts</description>
     <properties>
         <java.version>11</java.version>
