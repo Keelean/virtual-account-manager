@@ -13,13 +13,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang.StringUtils;
 
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
@@ -29,10 +22,7 @@ import java.math.BigDecimal;
 @Setter
 @SuperBuilder
 @ToString
-@Entity
-@Table(name = "customer_account")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "account_type")
+// Domain object built from a create request; the persisted record is AccountCustomer
 public abstract class Account extends AbstractBaseAuditableEntity {
 
     @Size(min = 5, max = 50)
@@ -49,10 +39,8 @@ public abstract class Account extends AbstractBaseAuditableEntity {
     @Builder.Default
     private Long maxDeposit = 0L;
     @Builder.Default
-    @Enumerated(EnumType.STRING)
     private TxnStatus txnStatus = TxnStatus.UNPROCESSED;
     @Builder.Default
-    @Enumerated(EnumType.STRING)
     private AccountMode accountMode = AccountMode.DYNAMIC;
 
 

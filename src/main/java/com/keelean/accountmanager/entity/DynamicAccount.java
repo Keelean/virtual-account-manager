@@ -7,16 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity
-@DiscriminatorValue("DYNAMIC")
 @SuperBuilder
 @ToString
 public class DynamicAccount extends Account {
