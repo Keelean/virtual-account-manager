@@ -24,14 +24,6 @@ public class ApplicationProperties {
     @NotNull
     private String switchName;
     
-    @Data
-    @ConfigurationProperties("payments")
-    @Component
-    public static class PaymentsProperties{
-      private String baseUrl;
-      private String processTxnPath;
-
-    }
 
     @Data
     @ConfigurationProperties("technical")
@@ -42,15 +34,6 @@ public class ApplicationProperties {
                 .asList(408, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511);
     }
 
-    @Data
-    @ConfigurationProperties("gateway")
-    @Component
-    public static class GatewayProperties{
-        private String baseUrl;
-        private String kycPath;
-        private String appVersion;
-        private String serviceId;
-    }
 
     @Data
     @ConfigurationProperties("kyc.source")
@@ -190,16 +173,6 @@ public class ApplicationProperties {
         private String bootstrapServer;
     }
 
-    @Data
-    @ConfigurationProperties("bus")
-    @Component
-    public static class BusProperties {
-        private String amProfileBaseUrl;
-        private String amTransactionBaseUrl;
-        private String amLastTransactionApiUrl;
-        private String xClientId;
-        private long validateUserlastTransactionMaxTimeInEpochTime=2629800;
-    }
 
     private String secretKey;
 

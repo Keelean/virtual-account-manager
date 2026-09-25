@@ -1,7 +1,5 @@
 package com.keelean.accountmanager.service.impl;
 
-//import com.example.platform.dao.EntitySessionManager;
-
 /*
 @Slf4j
 @Component("dynamic")

@@ -62,7 +62,6 @@ public class KafkaConsumer {
               && TransactionDirection.PULL.equals(txnDetails.getTransactionDirection())
               && llmProperties.getCreateCustomerAccountTxnType().contains(txnDetails.getTxnType())){
 
-        // Map<String, Object> kycResponseData = busHelperService.getKycDetails(msisdn);
         Map<String, Object> kycResponseData = new HashMap<>();
         log.info("kycResponseData for msisdn: {} is : {}", msisdn, kycResponseData);
         accountService.createCustomerWithAcc(kycResponseData, txnDetails);

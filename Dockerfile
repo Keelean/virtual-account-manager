@@ -1,4 +1,4 @@
-FROM internal-host:8083/openjdk:11-jdk-alpine
+FROM openjdk:11-jdk-alpine
 VOLUME /tmp
 ARG JAR_FILE
 ADD ${JAR_FILE} virtual-accounts.jar

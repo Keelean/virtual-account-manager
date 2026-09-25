@@ -65,10 +65,6 @@ public class AppConstants {
 
     public static final String LLM_OPTIN_TOPIC_NAME = "llm-user-optin";
 
-    //gateway
-    public static final String X_SERVICE_ID = "x-service-id";
-    public static final String X_APP_VERSION = "x-app-version";
-
     public static final String SUCCESS = "Success";
     public static final String ENABLED_STATUS = "ENABLED";
     public static final String MSISDN_KEY = "msisdn";
@@ -108,7 +104,6 @@ public class AppConstants {
     public static final String CURRENCY_NODE = "currencyCode";
     public static final String TRANSACTION_DETAILS = "transactionDetails";
     public static final String EXTRA_DATA = "extraData";
-    public static final String ASP_REGION = "asp-region";
     public static final String X_CLIENT_ID = "x-client-id";
     public static final String KYC_AM_X_CLIENT_ID_VALUE = "BILLER";
     public static final String RESPONSE = "response";

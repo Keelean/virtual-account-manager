@@ -19,16 +19,12 @@ public class JunitConstants {
     public static final Long KEY_ID = 273L;
     public static final String REQUEST_ID = "66336hsbbxHJSVYVSjd82";
     public static final String OTP = "jdL32U";
-    public static final String BANK_NAME = "Example Payment Bank";
     public static final String BRANCH_CODE = "AFRP00000324";
-    public static final String REGION_CODE = "hdvd3ncjj";
     public static final String SUCCESS_MSG = "Success";
     public static final String SUCCES_CODE = "200";
     public static final String SWITCH_NAME = "BNHSFV";
     public static final String BAD_REQ_MSG = "Invalid Request";
     public static final String BASE_URL = "https://localhost:8080";
-    public static final String BUS_AM_PROFILE_BASE_URL = "https://localhost:8080";
-    public static final String getRegionCode = "XX";
     public static final String KYC_VALIDATION_PROCESS_NAME = "JUNIT_PROCESS_NAME";
     public static final String NOTIFICATION_TYPE = "SMS";
     public static final String DOB = "1889-04-20";
