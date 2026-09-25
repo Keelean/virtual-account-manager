@@ -1,23 +1,23 @@
 package com.keelean.accountmanager.entity;
 
 import com.keelean.accountmanager.enums.TxnStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity(name = "customer_account")
-@Builder
+@Entity
+@DiscriminatorValue("DYNAMIC")
+@SuperBuilder
 @ToString
 public class DynamicAccount extends Account {
 

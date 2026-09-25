@@ -12,7 +12,7 @@ import com.keelean.accountmanager.exception.ErrorCodes;
 import com.keelean.accountmanager.repo.EntitySessionManager;
 import com.keelean.accountmanager.repo.PartnerAccountConfigRepo;
 import com.keelean.accountmanager.utils.AppUtils;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PartnerAccountConfigService {
 
-    private PartnerAccountConfigRepo repository;
-    private EntitySessionManager entitySessionManager;
-    private AccountPoolService accountPoolService;
+    private final PartnerAccountConfigRepo repository;
+    private final EntitySessionManager entitySessionManager;
+    private final AccountPoolService accountPoolService;
     @Value("${va-pool.dynamic.shared-pool-max-partners}")
     private Integer maxPartnersInSharedDynamicPool;
     @Value("${va-pool.static.shared-pool-max-partners}")

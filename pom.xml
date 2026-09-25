@@ -18,6 +18,9 @@
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
         <version.sentry.logback>1.7.22</version.sentry.logback>
         <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
+        <version.dockerfile>1.4.13</version.dockerfile>
+        <version.sonar>3.9.1.2184</version.sonar>
+        <version.jacoco>0.8.8</version.jacoco>
     </properties>
 
     <dependencies>
@@ -200,10 +203,12 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
+                <version>${version.sonar}</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.jacoco}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

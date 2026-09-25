@@ -6,8 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
@@ -33,12 +32,14 @@ public class PrimaryDataSource {
     @Autowired
     private TransactionHikariPoolConfig hikariPoolConfig;
 
+    @Autowired
+    private DataSourceProperties dataSourceProperties;
+
     @Bean(name = "accountManagerDatasource")
     @Primary
-    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource getDatasource(){
         log.info("Initialize Primary Datasource");
-        DataSource dataSource = DataSourceBuilder.create().build();
+        DataSource dataSource = dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
         if(dataSource instanceof HikariDataSource){
             HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
             hikariDataSource.setConnectionTimeout(hikariPoolConfig.getConnectionTimeout());
@@ -59,7 +60,7 @@ public class PrimaryDataSource {
         return props;
     }
 
-    @Bean
+    @Bean(name = {"accountManagerEntityFactory", "entityManagerFactory"})
     @Primary
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder, @Qualifier("accountManagerDatasource") DataSource dataSource) {
         return builder.dataSource(dataSource).packages("com.keelean.accountmanager.*").persistenceUnit("primary")

@@ -27,7 +27,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("payments")
     @Component
-    public class PaymentsProperties{
+    public static class PaymentsProperties{
       private String baseUrl;
       private String processTxnPath;
 
@@ -36,7 +36,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("technical")
     @Component
-    public class TechnicalProperties {
+    public static class TechnicalProperties {
 
         private List<Integer> errorCodes = Arrays
                 .asList(408, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511);
@@ -45,7 +45,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("gateway")
     @Component
-    public class GatewayProperties{
+    public static class GatewayProperties{
         private String baseUrl;
         private String kycPath;
         private String appVersion;
@@ -55,7 +55,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("kyc.source")
     @Component
-    public class KYCSourceProperties{
+    public static class KYCSourceProperties{
         @NotNull
         private String baseUrl;
         @NotNull
@@ -71,7 +71,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("kafka")
     @Component
-    public class KafkaProperties {
+    public static class KafkaProperties {
         private String bootstrapServer;
         private String producerAcks = AppConstants.KAFKA_PRODUCER_ACK;
         private int producerRetries = AppConstants.KAFKA_PRODUCER_RETRY;
@@ -82,7 +82,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("biller")
     @Component
-    public class BillerProperties{
+    public static class BillerProperties{
         private String baseUrl;
         private String createAccount;
         private String deleteAccount;
@@ -95,7 +95,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("llm")
     @Component
-    public class LLMProperties {
+    public static class LLMProperties {
         private String baseUrl;
         private String userOptin;
         private String userOptout;
@@ -159,7 +159,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("savings")
     @Component
-    public class SavingsProperties {
+    public static class SavingsProperties {
         private List<String> createSavingsAccountTxnType;
         private List<String> createSavingsAccountPartner;
     }
@@ -167,7 +167,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("retry")
     @Component
-    public class RetryProperties {
+    public static class RetryProperties {
         private int count;
         private long delay;
         private long initialInterval;
@@ -185,7 +185,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("spring.kafka.consumer")
     @Component
-    public class KafkaConsumerProperties {
+    public static class KafkaConsumerProperties {
         private int kafkaConcurrentSize;
         private String bootstrapServer;
     }
@@ -193,7 +193,7 @@ public class ApplicationProperties {
     @Data
     @ConfigurationProperties("bus")
     @Component
-    public class BusProperties {
+    public static class BusProperties {
         private String amProfileBaseUrl;
         private String amTransactionBaseUrl;
         private String amLastTransactionApiUrl;

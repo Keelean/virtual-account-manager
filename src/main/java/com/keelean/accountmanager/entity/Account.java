@@ -6,20 +6,32 @@ import com.keelean.accountmanager.enums.AccountMode;
 import com.keelean.accountmanager.enums.TxnStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang.StringUtils;
 
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
 @Setter
-@Builder
+@SuperBuilder
 @ToString
+@Entity
+@Table(name = "customer_account")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "account_type")
 public abstract class Account extends AbstractBaseAuditableEntity {
 
     @Size(min = 5, max = 50)
@@ -31,9 +43,15 @@ public abstract class Account extends AbstractBaseAuditableEntity {
     private String accountId;
     private String referenceId;
     private String invoiceRef;
+    @Builder.Default
     private Long minDeposit = 0L;
+    @Builder.Default
     private Long maxDeposit = 0L;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
     private TxnStatus txnStatus = TxnStatus.UNPROCESSED;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
     private AccountMode accountMode = AccountMode.DYNAMIC;
 
 

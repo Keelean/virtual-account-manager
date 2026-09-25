@@ -1,7 +1,7 @@
 package com.keelean.accountmanager.aspect;
 
-import com.keelean.legacy.accountmanager.entity.AccountActivity;
-import com.keelean.legacy.accountmanager.repo.AccountActivityRepo;
+import com.keelean.accountmanager.entity.AccountActivity;
+import com.keelean.accountmanager.repo.AccountActivityRepo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;

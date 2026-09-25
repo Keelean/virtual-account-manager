@@ -9,6 +9,7 @@ import com.keelean.accountmanager.enums.State;
 import com.keelean.accountmanager.repo.PartnerAccountConfigRepo;
 import com.keelean.accountmanager.utils.AppUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -17,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// Default for injection points that only use the base-class pool lookups; AccountPoolContext selects pools by name.
+@Primary
 @Component("shared")
 @AllArgsConstructor
 public class SharedAccountPoolService extends AccountPoolService {
