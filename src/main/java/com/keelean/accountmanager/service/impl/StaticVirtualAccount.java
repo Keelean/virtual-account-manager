@@ -29,6 +29,7 @@ public class StaticVirtualAccount extends AbstractVirtualAccount {
     @Override
     public FullAccountResponseDto singleFullCreation(Account virtualAccount) {
         AccountMode mode = AccountMode.STATIC_NORMAL;
+        // Invoice accounts are always created as closed-on-payment
         if (Objects.nonNull(virtualAccount.getInvoiceRef())) {
             mode = AccountMode.STATIC_INVOICE_CLOSED;
         }
