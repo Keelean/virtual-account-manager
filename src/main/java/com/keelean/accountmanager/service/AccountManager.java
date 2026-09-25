@@ -38,6 +38,9 @@ public class AccountManager {
     @SneakyThrows
     public BaseAccountResponseDto createVirtualAccount(BaseAccountRequestDto requestDto, String mode){
         //Validate Request
+        if (requestDto.getAccountType() == null) {
+            requestDto.setAccountType(AccountType.valueOf(mode.toUpperCase()));
+        }
         AbstractVirtualAccount abstractVirtualAccount = provider.getVirtualAccount(mode);
         Account virtualAccount = abstractVirtualAccount.createVirtualAccount(requestDto);
         virtualAccount.setReferenceId(requestDto.getReferenceId());

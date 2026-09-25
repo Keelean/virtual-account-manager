@@ -38,7 +38,8 @@ public interface AccountCustomerRepo extends JpaRepository<AccountCustomer, Long
     }
 
     private boolean validateDynamicAccount(AccountCustomer virtualAccountCustomer) {
-        return LocalDateTime.now().compareTo(virtualAccountCustomer.getExpiryDate()) < 0;
+        // Pre-created accounts have no expiry until they are completed
+        return virtualAccountCustomer.getExpiryDate() == null || LocalDateTime.now().compareTo(virtualAccountCustomer.getExpiryDate()) < 0;
     }
 
 }
