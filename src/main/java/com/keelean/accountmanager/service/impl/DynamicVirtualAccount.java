@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class DynamicVirtualAccount extends AbstractVirtualAccount {
                         .accountName(virtualAccount.getAccountName())
                         .waitStartTime(LocalDateTime.now().plus(timeout, ChronoUnit.MINUTES))
                         .accountType(AccountType.DYNAMIC)
-                        .amount(toAmount(virtualAccount.getAmount()))
+                        .amount(virtualAccount.getAmount())
                         .build())
                 .mode(AccountMode.DYNAMIC)
                 .partnerId(virtualAccount.getPartnerId())
@@ -74,7 +73,7 @@ public class DynamicVirtualAccount extends AbstractVirtualAccount {
     public BaseAccountResponseDto preCreation(Account virtualAccount) {
         AccountCustomer virtualAccountCustomer = AccountCustomer.builder()
                 .meta(AccountMeta.builder()
-                        .amount(toAmount(virtualAccount.getAmount()))
+                        .amount(virtualAccount.getAmount())
                         .accountName(virtualAccount.getAccountName())
                         .waitStartTime(toWaitStartTime(virtualAccount.getWaitStartTime()))
                         .accountType(AccountType.DYNAMIC)
@@ -108,10 +107,6 @@ public class DynamicVirtualAccount extends AbstractVirtualAccount {
                 .filter(virtualAccountFuture -> !virtualAccountFuture.isCompletedExceptionally())
                 .map(campaignFuture -> campaignFuture.getNow(BaseAccountResponseDto.builder().build()))
                 .collect(Collectors.toList());
-    }
-
-    static BigDecimal toAmount(Long amount) {
-        return amount == null ? null : BigDecimal.valueOf(amount);
     }
 
     // Account keeps the wait start as an offset in hours; the stored meta keeps the resulting time

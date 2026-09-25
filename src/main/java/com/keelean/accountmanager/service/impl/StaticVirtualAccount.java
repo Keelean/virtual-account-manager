@@ -51,7 +51,7 @@ public class StaticVirtualAccount extends AbstractVirtualAccount {
 
         AccountCustomer virtualAccountCustomer = AccountCustomer.builder()
                 .meta(AccountMeta.builder()
-                        .amount(DynamicVirtualAccount.toAmount(virtualAccount.getAmount()))
+                        .amount(virtualAccount.getAmount())
                         .waitStartTime(DynamicVirtualAccount.toWaitStartTime(virtualAccount.getWaitStartTime()))
                         .accountName(virtualAccount.getAccountName())
                         .accountType(AccountType.STATIC)

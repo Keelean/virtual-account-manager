@@ -10,7 +10,7 @@ import lombok.ToString;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.math.BigDecimal;
 
 @NoArgsConstructor
 @Getter
@@ -29,12 +29,12 @@ public class DynamicAccount extends Account {
     }
 
     @Override
-    public boolean isAmountValid(Long amount) {
+    public boolean isAmountValid(BigDecimal amount) {
         return checkAmountValidityForDynamic(amount);
     }
 
-    private boolean checkAmountValidityForDynamic(Long amount) {
-        return Objects.equals(getAmount(), amount);
+    private boolean checkAmountValidityForDynamic(BigDecimal amount) {
+        return getAmount() != null && amount != null && getAmount().compareTo(amount) == 0;
     }
 
     public boolean isAccountReusable() {

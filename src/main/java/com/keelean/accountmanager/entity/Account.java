@@ -21,6 +21,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,7 +37,7 @@ public abstract class Account extends AbstractBaseAuditableEntity {
 
     @Size(min = 5, max = 50)
     private String accountName;
-    private Long amount;
+    private BigDecimal amount;
     private Integer timeoutInMins;
     private Integer waitStartTime;
     private String partnerId;
@@ -57,7 +58,7 @@ public abstract class Account extends AbstractBaseAuditableEntity {
 
     public abstract boolean isExpired();
 
-    public abstract boolean isAmountValid(Long amount);
+    public abstract boolean isAmountValid(BigDecimal amount);
 
     public String displayName(String partnerName) {
         if (StringUtils.isEmpty(accountName)) {
@@ -87,11 +88,11 @@ public abstract class Account extends AbstractBaseAuditableEntity {
         this.accountName = accountName;
     }
 
-    public Long getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
