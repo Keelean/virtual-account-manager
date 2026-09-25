@@ -2,27 +2,13 @@ package com.keelean.accountmanager.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.keelean.accountmanager.constants.AppConstants;
-import org.hibernate.SessionFactory;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
-import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
-import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
-import io.opentracing.Tracer;
-import io.opentracing.noop.NoopTracerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 @Configuration
 public class ApplicationConfig {
@@ -44,14 +30,6 @@ public class ApplicationConfig {
     messageSource.setFallbackToSystemLocale(false);
     messageSource.setDefaultLocale(Locale.ENGLISH);
     return messageSource;
-  }
-
-  // With Jaeger disabled, opentracing's fallback resolves a Jaeger tracer from environment variables only
-  // and logs errors when they are unset; tracing is off, so register a no-op tracer instead.
-  @Bean
-  @ConditionalOnProperty(value = "opentracing.jaeger.enabled", havingValue = "false")
-  public Tracer noopTracer() {
-    return NoopTracerFactory.create();
   }
 
   @Bean

@@ -2,9 +2,11 @@ package com.keelean.accountmanager.config;
 
 import de.codecentric.boot.admin.client.config.ClientProperties;
 import de.codecentric.boot.admin.client.registration.BlockingRegistrationClient;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -44,13 +46,19 @@ public class SpringBootAdminConfig {
 			} };
 			SSLContext sslContext = SSLContext.getInstance("SSL");
 			sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-			CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
-					.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+			CloseableHttpClient httpClient = HttpClients.custom()
+					.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+							.setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+									.setSslContext(sslContext)
+									.setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+									.build())
+							.build())
+					.build();
 			HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
 			customRequestFactory.setHttpClient(httpClient);
 
-			RestTemplateBuilder builder = new RestTemplateBuilder().setConnectTimeout(client.getConnectTimeout())
-					.setReadTimeout(client.getReadTimeout()).requestFactory(() -> customRequestFactory);
+			RestTemplateBuilder builder = new RestTemplateBuilder().connectTimeout(client.getConnectTimeout())
+					.readTimeout(client.getReadTimeout()).requestFactory(() -> customRequestFactory);
 			if (client.getUsername() != null && client.getPassword() != null) {
 				builder = builder.basicAuthentication(client.getUsername(), client.getPassword());
 			}

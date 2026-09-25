@@ -3,7 +3,7 @@ package com.keelean.accountmanager.entity;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 @SuperBuilder

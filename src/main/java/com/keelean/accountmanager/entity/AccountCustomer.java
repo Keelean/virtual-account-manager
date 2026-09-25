@@ -2,13 +2,14 @@ package com.keelean.accountmanager.entity;
 
 import com.keelean.accountmanager.enums.AccountMode;
 import com.keelean.accountmanager.enums.AccountStatus;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -31,7 +32,7 @@ public class AccountCustomer extends AbstractBaseAuditableEntity {
     @Enumerated(EnumType.STRING)
     private AccountMode mode;
 
-    @Type(type = "jsonb")
+    @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
     private AccountMeta meta;
 }

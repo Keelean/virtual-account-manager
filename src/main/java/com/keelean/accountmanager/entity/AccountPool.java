@@ -2,13 +2,14 @@ package com.keelean.accountmanager.entity;
 
 import com.keelean.accountmanager.enums.AccountCapacity;
 import com.keelean.accountmanager.enums.State;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -34,7 +35,7 @@ public class AccountPool extends AbstractBaseAuditableEntity {
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private State state = State.OPEN;
-    @Type(type = "jsonb")
+    @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
     @Builder.Default
     private Set<String> excludedPrefixStart = new HashSet<>();

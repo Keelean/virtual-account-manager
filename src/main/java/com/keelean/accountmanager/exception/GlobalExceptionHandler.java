@@ -9,9 +9,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -60,19 +60,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
-                                                                  HttpStatus status, WebRequest request) {
-        return validationFailure(ex.getBindingResult(), ex);
-    }
-
-    @Override
-    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+                                                                  HttpStatusCode status, WebRequest request) {
         return validationFailure(ex.getBindingResult(), ex);
     }
 
     // Every other Spring MVC exception (unreadable body, type mismatch, unsupported method, ...) keeps its status
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers,
-                                                             HttpStatus status, WebRequest request) {
+                                                             HttpStatusCode statusCode, WebRequest request) {
+        HttpStatus status = HttpStatus.valueOf(statusCode.value());
         ResponseEntity<Object> response = failure(status, String.valueOf(status.value()), status.getReasonPhrase(), ex, null);
         return new ResponseEntity<>(response.getBody(), headers, status);
     }

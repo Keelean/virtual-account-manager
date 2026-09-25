@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,7 +40,7 @@ public class WebclientHelperService {
                     .uri(url)
                     .headers(headers -> headers.addAll(httpHeaders))
                     .bodyValue(request).retrieve()
-                    .onStatus(HttpStatus::isError, this::getErrorResponse)
+                    .onStatus(HttpStatusCode::isError, this::getErrorResponse)
                     .bodyToMono(responseType)
                     .block();
         } catch (Exception resX) {
@@ -53,7 +53,7 @@ public class WebclientHelperService {
         return webClient.get().uri(url)
                 .headers(headers -> headers.addAll(httpHeaders))
                 .retrieve()
-                .onStatus(HttpStatus::isError, this::getErrorResponse)
+                .onStatus(HttpStatusCode::isError, this::getErrorResponse)
                 .bodyToMono(typeReference)
                 .block();
     }
@@ -63,7 +63,7 @@ public class WebclientHelperService {
     }
 
     private Mono<Throwable> getErrorResponse(ClientResponse res) {
-        log.info("Response status: {}", res.rawStatusCode());
+        log.info("Response status: {}", res.statusCode().value());
         log.info("Response headers: {}", res.headers().asHttpHeaders());
         return res.bodyToMono(String.class).flatMap(error -> {
             String errorMessage = error;
@@ -71,7 +71,7 @@ public class WebclientHelperService {
                 errorMessage = handleBaseRestResponse(objectMapper.readValue(error, BaseRestResponse.class));
             } catch (JsonProcessingException e) {
                 log.error("[Webclient helper] An error occurred {}", e.getMessage());
-                if(technicalProperties.getErrorCodes().contains(res.rawStatusCode())) {
+                if(technicalProperties.getErrorCodes().contains(res.statusCode().value())) {
                     return Mono.error(new RuntimeException(ErrorCodes.DOWN_STREAM_TECHNICAL_ERROR.getCode()));
                 }
             }
@@ -94,7 +94,7 @@ public class WebclientHelperService {
                             queryParam(AppConstants.FROM_DATE,fromEpochTime).queryParam(AppConstants.TO_DATE,toEpochTime).build().toUri())
                     .headers(headers -> headers.addAll(httpHeaders))
                     .retrieve()
-                    .onStatus(HttpStatus::isError, this::getErrorResponse)
+                    .onStatus(HttpStatusCode::isError, this::getErrorResponse)
                     .bodyToMono(typeReference)
                     .block();
         } catch (Exception ex) {
