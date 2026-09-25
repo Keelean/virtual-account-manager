@@ -32,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "spring.boot.admin.enabled=false",
-        "spring.boot.admin.client.enabled=false",
         "kafka.listen.auto.start=false",
         "logging.level.com.keelean=WARN",
         "logging.level.org.springframework.web=WARN"

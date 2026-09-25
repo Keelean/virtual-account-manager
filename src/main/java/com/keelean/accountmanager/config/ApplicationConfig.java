@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Locale;
 
@@ -30,11 +29,6 @@ public class ApplicationConfig {
     messageSource.setFallbackToSystemLocale(false);
     messageSource.setDefaultLocale(Locale.ENGLISH);
     return messageSource;
-  }
-
-  @Bean
-  public WebClient webClient(WebClient.Builder builder) {
-    return builder.build();
   }
 
 }
