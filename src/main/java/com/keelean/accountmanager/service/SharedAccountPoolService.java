@@ -48,7 +48,7 @@ public class SharedAccountPoolService extends AccountPoolService {
         excludedPrefixes.addAll(existingPartnerPrefixes);
 
         for (int i = 0; i < totalPossibleAllocations; i++) {
-            String sharedPrefixSeries = AppUtils.formatStartSequence(totalPossibleAllocations, accountPoolDto.getPrefixSeries(), i);
+            String sharedPrefixSeries = AppUtils.formatStartSequence(AccountCapacity.getStartPrefixWidth(accountPoolDto.getCapacity()), accountPoolDto.getPrefixSeries(), i);
             //check if sharedPrefixSeries already assigned
             if (!excludedPrefixes.contains(sharedPrefixSeries)) {
                 //create new sequence

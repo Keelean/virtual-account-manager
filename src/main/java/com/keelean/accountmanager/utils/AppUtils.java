@@ -32,7 +32,7 @@ public class AppUtils {
     }
 
     public static String formatEndSequence(int reusableDigits, int sequence) {
-        String format = "%0" + reusableDigits + "d" + "%d";
+        String format = "%0" + reusableDigits + "d";
         String endSequence = String.format(format, sequence);
         log.info("Format end sequence::{}", endSequence);
         return endSequence;

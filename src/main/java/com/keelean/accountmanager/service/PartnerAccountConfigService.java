@@ -9,6 +9,7 @@ import com.keelean.accountmanager.enums.AccountCapacity;
 import com.keelean.accountmanager.enums.AccountType;
 import com.keelean.accountmanager.enums.ConfigStatus;
 import com.keelean.accountmanager.exception.ErrorCodes;
+import com.keelean.accountmanager.exception.RestServiceException;
 import com.keelean.accountmanager.repo.EntitySessionManager;
 import com.keelean.accountmanager.repo.PartnerAccountConfigRepo;
 import com.keelean.accountmanager.utils.AppUtils;
@@ -81,32 +82,27 @@ public class PartnerAccountConfigService {
 
     private Optional<String> assignPrefixNotAlreadyAllocated(AccountCapacity capacity, String prefixSeries, Set<String> allPrefixes) {
         int prefixWidth = AccountCapacity.getStartPrefixWidth(capacity);
-        Optional<String> partnersAccountPrefix = Optional.empty();
         //Loop through all possible allocations
         for (int allocation = 0; allocation < (int) Math.pow(10.0, prefixWidth); allocation++) {
-            partnersAccountPrefix = Optional.of(AppUtils.formatStartSequence(prefixWidth, Integer.parseInt(prefixSeries), allocation));
-            if (!allPrefixes.contains(partnersAccountPrefix)) {
-                break;
+            String candidatePrefix = AppUtils.formatStartSequence(prefixWidth, Integer.parseInt(prefixSeries), allocation);
+            if (!allPrefixes.contains(candidatePrefix)) {
+                return Optional.of(candidatePrefix);
             }
         }
-
-        if (partnersAccountPrefix.isEmpty()) {
-            throw new IllegalArgumentException("Dedicated pool for series is exhausted!");
-        }
-        return partnersAccountPrefix;
+        throw new IllegalArgumentException("Dedicated pool for series is exhausted!");
     }
 
     private void allocateSharedPool(PartnerAccountConfig partnerAccountConfig, PartnerConfigCreateRequest request) {
         AccountPool accountPool = accountPoolService.findPoolByPrefixSeries(Integer.parseInt(request.getAccountPrefix()));
         validateSharedPoolAllocation(accountPool);
-        if (request.getAccountType() == AccountType.DYNAMIC && accountPool.getAllocationCount() + 1 <= maxPartnersInSharedDynamicPool) {
-            accountPool.setAllocationCount(accountPool.getAllocationCount() + 1);
-        } else if (request.getAccountType() == AccountType.STATIC && accountPool.getAllocationCount() + 1 <= maxPartnersInSharedStaticPool) {
-            accountPool.setAllocationCount(accountPool.getAllocationCount() + 1);
+        int maxPartners = request.getAccountType() == AccountType.DYNAMIC ? maxPartnersInSharedDynamicPool : maxPartnersInSharedStaticPool;
+        int allocationCount = accountPool.getAllocationCount() == null ? 0 : accountPool.getAllocationCount();
+        if (allocationCount >= maxPartners) {
+            throw new IllegalArgumentException("Shared pool has reached its maximum of " + maxPartners + " partners! Please create a new pool and try again!");
         }
 
         partnerAccountConfig.setPrefix(String.valueOf(accountPool.getStartPrefix()));
-        accountPool.setAllocationCount(accountPool.getAllocationCount() + 1);
+        accountPool.setAllocationCount(allocationCount + 1);
         accountPoolService.saveOrUpdatePool(accountPool);
     }
 
@@ -121,6 +117,17 @@ public class PartnerAccountConfigService {
     }
 
     private PartnerAccountConfig mapRequestToEntity(PartnerConfigCreateRequest request) {
+        return PartnerAccountConfig.builder()
+                .meta(buildMeta(request))
+                .code(request.getCode())
+                .partnerId(request.getPartnerId())
+                .status(ConfigStatus.DISABLED)
+                .capacity(request.getCapacity())
+                .prefix(request.getAccountPrefix())
+                .build();
+    }
+
+    private PartnerAccountConfigMeta buildMeta(PartnerConfigCreateRequest request) {
         boolean exactPayment = request.isExactPayment();
         Integer minDeposit = request.getMinDeposit();
         Integer maxDeposit = request.getMaxDeposit();
@@ -141,42 +148,43 @@ public class PartnerAccountConfigService {
 
         }
 
-        return PartnerAccountConfig.builder()
-                .meta(PartnerAccountConfigMeta.builder()
-                        .accountDetails(request.getAccountDetails())
-                        .accountType(request.getAccountType())
-                        .gradeCode(request.getGradeCode())
-                        .templateName(request.getTemplateName())
-                        .routeId(request.getRouteId())
-                        .defaultLookupDisplayName(request.getDefaultLookUpDisplayName())
-                        .exactPayment(exactPayment)
-                        .minMultiplier(minDeposit)
-                        .maxMultiplier(maxDeposit)
-                        .build())
-                .code(request.getCode())
-                .partnerId(request.getPartnerId())
-                .status(ConfigStatus.DISABLED)
-                .capacity(request.getCapacity())
-                .prefix(request.getAccountPrefix())
+        return PartnerAccountConfigMeta.builder()
+                .accountDetails(request.getAccountDetails())
+                .accountType(request.getAccountType())
+                .gradeCode(request.getGradeCode())
+                .templateName(request.getTemplateName())
+                .routeId(request.getRouteId())
+                .defaultLookupDisplayName(request.getDefaultLookUpDisplayName())
+                .exactPayment(exactPayment)
+                .minMultiplier(minDeposit)
+                .maxMultiplier(maxDeposit)
                 .build();
     }
 
-    public PartnerConfigResponse update(Long config, String partnerId) {
+    // Only the partner's business rules can change; the allocation (prefix, capacity, account type) is fixed at creation.
+    public PartnerConfigResponse update(Long configId, String partnerId, PartnerConfigCreateRequest request) {
 
-        Optional<PartnerAccountConfig> partnerConfigOptional = repository.findById(config);
-        if (!partnerConfigOptional.isPresent()) {
-            //throw new RestServiceException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
-            throw new RuntimeException();
+        PartnerAccountConfig partnerAccountConfig = repository.findById(configId)
+                .orElseThrow(() -> new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId));
+
+        if (!partnerAccountConfig.getPartnerId().equals(partnerId)) {
+            throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
         }
 
-        PartnerAccountConfig virtualAccountPartnerConfig = partnerConfigOptional.get();
-        if (!virtualAccountPartnerConfig.getPartnerId().equals(partnerId)) {
-            //throw new RestServiceException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
-            throw new RuntimeException();
+        if (request.getAccountType() != partnerAccountConfig.getMeta().getAccountType()) {
+            throw new RestServiceException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
         }
+
+        partnerAccountConfig.setCode(request.getCode());
+        partnerAccountConfig.setMeta(buildMeta(request));
+        partnerAccountConfig = entitySessionManager.saveOrUpdateCommit(partnerAccountConfig);
 
         return PartnerConfigResponse.builder()
-                .configId(Long.valueOf("2"))
+                .partnerCode(partnerAccountConfig.getCode())
+                .capacity(partnerAccountConfig.getCapacity().name())
+                .partnerId(partnerAccountConfig.getPartnerId())
+                .prefix(partnerAccountConfig.getPrefix())
+                .configId(partnerAccountConfig.getId())
                 .build();
     }
 

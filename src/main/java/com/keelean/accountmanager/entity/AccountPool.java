@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,15 +28,18 @@ public class AccountPool extends AbstractBaseAuditableEntity {
     private Integer prefixSeries; //should only contain 2 digits, 50, 51, etc
     private Integer prefixEndSeries;
     private Integer startPrefix;
-    private Integer startPrefixCount;
+    @Builder.Default
+    private Integer startPrefixCount = 0;
     private Integer currentSequence;
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private State state = State.OPEN;
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
-    private Set<String> excludedPrefixStart;
-    private Integer allocationCount;
+    @Builder.Default
+    private Set<String> excludedPrefixStart = new HashSet<>();
+    @Builder.Default
+    private Integer allocationCount = 0;
 
     public boolean isOpen() {
         return state == State.OPEN;

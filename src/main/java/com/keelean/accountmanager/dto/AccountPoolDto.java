@@ -11,7 +11,8 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +24,8 @@ public class AccountPoolDto {
 
     @NotNull
     private AccountCapacity capacity;
-    @Size(min = 10)
+    @Min(10)
+    @Max(99)
     private int prefixSeries;
     @NotNull
     private PoolType poolType;

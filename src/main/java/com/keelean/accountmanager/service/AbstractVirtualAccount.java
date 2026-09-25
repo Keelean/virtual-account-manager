@@ -69,12 +69,12 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
                 AccountPool accountPool = accountPoolService.findPoolByPrefixSeries(Integer.valueOf(config.getPrefix()));
                 //Check for daily maximum
                 //TODO Check if maximum account for day is reached?
-                virtualAccountId = AppUtils.formatEndSequence(accountPool.getCapacity().getReusableDigits(), accountPool.generateSequence());
+                virtualAccountId = accountPool.getStartPrefix() + AppUtils.formatEndSequence(accountPool.getCapacity().getReusableDigits(), accountPool.generateSequence());
 
                 //Check if account already exist
                 accountPoolService.saveOrUpdatePool(accountPool);
             } else {
-                virtualAccountId = AppUtils.formatEndSequence(config.getCapacity().getReusableDigits(), config.generateSequence());
+                virtualAccountId = config.getPrefix() + AppUtils.formatEndSequence(config.getCapacity().getReusableDigits(), config.generateSequence());
                 configService.update(config);
             }
 

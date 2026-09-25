@@ -34,7 +34,7 @@ public class AccountPartnerConfigController {
 
     @PostMapping("/{configId}/{partnerId}")
     Response<PartnerConfigResponse> update(@PathVariable Long configId, @PathVariable String partnerId, @RequestBody @Valid PartnerConfigCreateRequest configCreateRequest){
-        PartnerConfigResponse responseDto = partnerConfigService.update(configId, partnerId);
+        PartnerConfigResponse responseDto = partnerConfigService.update(configId, partnerId, configCreateRequest);
         Response<PartnerConfigResponse> rv = new Response<>();
         rv.setData(responseDto);
         AppUtils.setSuccessResponse(rv);

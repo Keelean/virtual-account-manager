@@ -28,18 +28,9 @@ public enum AccountCapacity {
     }
 
 
+    // Digits left between the 2-digit prefix series and the reusable digits of a 10-digit account number
     public static int getStartPrefixWidth(AccountCapacity capacity) {
-        switch (capacity) {
-            case MILLION_10:
-                return 10 - MILLION_10.getReusableDigits() - 2;
-            case MILLION_1:
-                return 10 - MILLION_1.getReusableDigits() - 2;
-            case SHARED_POOL_1:
-                return 10 - SHARED_POOL_1.getReusableDigits() - 2;
-            case SHARED_POOL_10:
-                return 10 - SHARED_POOL_10.getReusableDigits() - 2;
-        }
-        return 0;
+        return 10 - capacity.getReusableDigits() - 2;
     }
 
 
