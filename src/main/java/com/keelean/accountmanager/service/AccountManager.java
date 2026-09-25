@@ -19,8 +19,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Component
@@ -240,9 +238,8 @@ public class AccountManager {
             List<BaseAccountResponseDto> virtualAccounts = new ArrayList<>();
 
             AbstractVirtualAccount abstractVirtualAccount = provider.getVirtualAccount("dynamic");
-            Iterable<BaseAccountRequestDto> iterable = () -> baseVirtualAccountRequestDtos.iterator();
-            Stream<BaseAccountRequestDto> stream = StreamSupport.stream(iterable.spliterator(), true);
-            stream.forEach(req -> {
+            // Sequential: items for one partner share a sequence row, so running them in parallel fails the optimistic lock
+            baseVirtualAccountRequestDtos.forEach(req -> {
                 try {
                     req.setAccountType(AccountType.STATIC);
                     Account virtualAccount = abstractVirtualAccount.createVirtualAccount(req);

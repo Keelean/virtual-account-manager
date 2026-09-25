@@ -6,6 +6,8 @@ import com.keelean.accountmanager.enums.AccountType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -14,7 +16,11 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @ToString
-public class PartnerAccountConfigMeta {
+// Stored as jsonb; Hypersistence Utils deep-copies JSON attributes via Java serialization
+public class PartnerAccountConfigMeta implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String defaultLookupDisplayName;
     private String gradeCode;
     private String accountDetails;
