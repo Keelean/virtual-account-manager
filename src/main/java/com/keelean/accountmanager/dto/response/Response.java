@@ -4,7 +4,7 @@ package com.keelean.accountmanager.dto.response;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.keelean.accountmanager.dto.BaseRestResponse;
 import lombok.Data;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
 
