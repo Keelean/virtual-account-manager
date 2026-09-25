@@ -1,5 +1,6 @@
 package com.keelean.accountmanager.service.impl;
 
+import com.keelean.accountmanager.constants.AppConstants;
 import com.keelean.accountmanager.dto.BaseAccountRequestDto;
 import com.keelean.accountmanager.dto.BaseAccountResponseDto;
 import com.keelean.accountmanager.dto.FullAccountResponseDto;
@@ -27,22 +28,19 @@ import java.util.stream.Collectors;
 @Component("dynamic")
 public class DynamicVirtualAccount extends AbstractVirtualAccount {
 
-    // Minimum time a dynamic account stays open for payment (24 hours)
-    private static final long MIN_TIMEOUT_IN_MINS = 1440;
-
     @Autowired
     private EntitySessionManager entitySessionManager;
 
     @Override
     public FullAccountResponseDto singleFullCreation(Account virtualAccount) {
         long timeout = virtualAccount.getTimeoutInMins() == null
-                ? MIN_TIMEOUT_IN_MINS
-                : Math.max(virtualAccount.getTimeoutInMins(), MIN_TIMEOUT_IN_MINS);
+                ? AppConstants.DYNAMIC_PAYMENT_WINDOW_MINS
+                : Math.max(virtualAccount.getTimeoutInMins(), AppConstants.DYNAMIC_PAYMENT_WINDOW_MINS);
 
         AccountCustomer virtualAccountCustomer = AccountCustomer.builder()
                 .accountId(virtualAccount.getAccountId())
                 .referenceId(virtualAccount.getReferenceId())
-                .expiryDate(LocalDateTime.now().plus(90, ChronoUnit.DAYS))
+                .expiryDate(LocalDateTime.now().plus(AppConstants.DYNAMIC_ACCOUNT_EXPIRY_DAYS, ChronoUnit.DAYS))
                 .status(AccountStatus.CREATED)
                 .meta(AccountMeta.builder()
                         .accountName(virtualAccount.getAccountName())

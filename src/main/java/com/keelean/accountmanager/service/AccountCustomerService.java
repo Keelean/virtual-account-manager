@@ -2,6 +2,7 @@ package com.keelean.accountmanager.service;
 
 
 import com.keelean.accountmanager.aspect.ActivityLog;
+import com.keelean.accountmanager.constants.AppConstants;
 import com.keelean.accountmanager.dto.AccountCustomerResponseDto;
 import com.keelean.accountmanager.dto.AccountUpdateRequestDto;
 import com.keelean.accountmanager.dto.FullAccountResponseDto;
@@ -70,7 +71,10 @@ public class AccountCustomerService {
 
         if(customer.getMeta().getAccountType() == AccountType.DYNAMIC && customer.getMeta().getWaitStartTime() == null){
             //Integer expire = request.getTimeoutInMins();
-            customer.getMeta().setWaitStartTime(LocalDateTime.now().plus(1440, ChronoUnit.HOURS));
+            customer.getMeta().setWaitStartTime(LocalDateTime.now().plus(AppConstants.DYNAMIC_PAYMENT_WINDOW_MINS, ChronoUnit.MINUTES));
+            if (customer.getExpiryDate() == null) {
+                customer.setExpiryDate(LocalDateTime.now().plus(AppConstants.DYNAMIC_ACCOUNT_EXPIRY_DAYS, ChronoUnit.DAYS));
+            }
             validatePartnerAndCustomerName(request.getAccountName(), partnerConfigResponses.getPartnerName());
             customer.getMeta().setAccountName(request.getAccountName());
             customer.getMeta().setAmount(request.getAmount());

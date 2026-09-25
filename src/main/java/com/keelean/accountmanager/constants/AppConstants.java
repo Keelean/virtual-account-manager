@@ -4,6 +4,10 @@ import java.util.Set;
 
 public class AppConstants {
 
+    // Minimum time a dynamic account stays open for payment (24 hours)
+    public static final long DYNAMIC_PAYMENT_WINDOW_MINS = 1440;
+    public static final long DYNAMIC_ACCOUNT_EXPIRY_DAYS = 90;
+
     private AppConstants() {}
 
     // Customer controller url path
