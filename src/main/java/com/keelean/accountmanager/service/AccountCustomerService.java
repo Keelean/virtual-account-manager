@@ -155,8 +155,8 @@ public class AccountCustomerService {
                     .partnerCode(partnerConfig.getCode())
                     .build();
         }
-        return AccountCustomerResponseDto.builder()
-                .build();
+        log.info("Account ID({}) does not exist!", referenceIdOrAccountId);
+        throw new RestServiceException(ErrorCodes.ACCOUNT_DOES_NOT_EXIST.getCode(), referenceIdOrAccountId);
 
     }
 
@@ -333,7 +333,8 @@ public class AccountCustomerService {
         AccountCustomer vc;
 
         if(vcList.isEmpty()){
-            vc = null;
+            log.info("Account ID({}) does not exist!", accountOrReferenceId);
+            throw new RestServiceException(ErrorCodes.ACCOUNT_DOES_NOT_EXIST.getCode(), accountOrReferenceId);
         }else {
             //return expired dynamic account else return null
             Optional<AccountCustomer> optionalVirtualAccountCustomer = vcList.stream().filter(v -> validateDynamicAccount(v)).findFirst();
