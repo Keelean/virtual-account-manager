@@ -34,10 +34,20 @@ public class StaticAccount extends Account {
     }
 
     private boolean checkAmountValidityForStatic(BigDecimal amount) {
-        if (getMinDeposit() == 0 || getMaxDeposit() == 0)
-            return getAmount() != null && amount != null && getAmount().compareTo(amount) == 0;
+        if (amount == null || getAmount() == null)
+            return false;
 
-        return amount.compareTo(BigDecimal.valueOf(getMinDeposit())) >= 0 || amount.compareTo(BigDecimal.valueOf(getMaxDeposit())) <= 0;
+        if (!isSet(getMinDeposit()) || !isSet(getMaxDeposit()))
+            return getAmount().compareTo(amount) == 0;
+
+        // Min and max deposits are multipliers in tenths of the account amount: 5 allows 0.5x, 20 allows 2x
+        BigDecimal lowest = getAmount().multiply(BigDecimal.valueOf(getMinDeposit())).divide(BigDecimal.TEN);
+        BigDecimal highest = getAmount().multiply(BigDecimal.valueOf(getMaxDeposit())).divide(BigDecimal.TEN);
+        return amount.compareTo(lowest) >= 0 && amount.compareTo(highest) <= 0;
+    }
+
+    private static boolean isSet(Long deposit) {
+        return deposit != null && deposit > 0;
     }
 
     public boolean isWithinEditableWindow(){
