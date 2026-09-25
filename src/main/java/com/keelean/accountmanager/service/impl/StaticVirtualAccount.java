@@ -28,6 +28,18 @@ public class StaticVirtualAccount extends AbstractVirtualAccount {
 
     @Override
     public FullAccountResponseDto singleFullCreation(Account virtualAccount) {
+        AccountCustomer virtualAccountCustomer = toFullCustomer(virtualAccount);
+        entitySessionManager.saveOrUpdateCommit(virtualAccountCustomer);
+        log.info("Created static account {} for reference {}", virtualAccount.getAccountId(), virtualAccount.getReferenceId());
+        return FullAccountResponseDto.builder()
+                .accountId(virtualAccount.getAccountId())
+                .expiryDate(virtualAccountCustomer.getExpiryDate())
+                .referenceId(virtualAccount.getReferenceId())
+                .build();
+    }
+
+    @Override
+    public AccountCustomer toFullCustomer(Account virtualAccount) {
         AccountMode mode = AccountMode.STATIC_NORMAL;
         // Invoice accounts are always created as closed-on-payment
         if (Objects.nonNull(virtualAccount.getInvoiceRef())) {
@@ -50,7 +62,7 @@ public class StaticVirtualAccount extends AbstractVirtualAccount {
             }
         }
 
-        AccountCustomer virtualAccountCustomer = AccountCustomer.builder()
+        return AccountCustomer.builder()
                 .meta(AccountMeta.builder()
                         .amount(virtualAccount.getAmount())
                         .waitStartTime(DynamicVirtualAccount.toWaitStartTime(virtualAccount.getWaitStartTime()))
@@ -66,13 +78,6 @@ public class StaticVirtualAccount extends AbstractVirtualAccount {
                 .status(AccountStatus.CREATED)
                 .mode(mode)
                 .partnerId(virtualAccount.getPartnerId())
-                .build();
-        entitySessionManager.saveOrUpdateCommit(virtualAccountCustomer);
-        log.info("Created static account {} for reference {}", virtualAccount.getAccountId(), virtualAccount.getReferenceId());
-        return FullAccountResponseDto.builder()
-                .accountId(virtualAccount.getAccountId())
-                .expiryDate(virtualAccountCustomer.getExpiryDate())
-                .referenceId(virtualAccount.getReferenceId())
                 .build();
     }
 

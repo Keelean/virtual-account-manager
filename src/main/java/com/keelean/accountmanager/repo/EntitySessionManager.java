@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @Slf4j
 public class EntitySessionManager {
@@ -36,5 +38,21 @@ public class EntitySessionManager {
             }
         }
         return entity;
+    }
+
+    // Saves every entity in one transaction: all rows are committed, or none are
+    public <T> List<T> saveAllCommit(List<T> entities) {
+        try (Session session = this.sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            try {
+                entities.forEach(session::saveOrUpdate);
+                session.flush();
+                transaction.commit();
+            } catch (RuntimeException e) {
+                transaction.rollback();
+                throw e;
+            }
+        }
+        return entities;
     }
 }

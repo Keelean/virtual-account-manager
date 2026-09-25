@@ -5,7 +5,6 @@ import com.keelean.accountmanager.dto.AccountRequestDto;
 import com.keelean.accountmanager.dto.BaseAccountRequestDto;
 import com.keelean.accountmanager.entity.Account;
 import com.keelean.accountmanager.entity.AccountCustomer;
-import com.keelean.accountmanager.entity.AccountPool;
 import com.keelean.accountmanager.entity.DynamicAccount;
 import com.keelean.accountmanager.entity.PartnerAccountConfig;
 import com.keelean.accountmanager.entity.StaticAccount;
@@ -15,7 +14,6 @@ import com.keelean.accountmanager.exception.RestServiceException;
 import com.keelean.accountmanager.mapper.AccountCustomerMapper;
 import com.keelean.accountmanager.repo.AccountCustomerRepo;
 import com.keelean.accountmanager.repo.EntitySessionManager;
-import com.keelean.accountmanager.utils.AppUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -23,10 +21,17 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -39,7 +44,7 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
     @Autowired
     private AccountCustomerMapper virtualAccountCustomerMapper;
     @Autowired
-    private AccountPoolService accountPoolService;
+    private SequenceAllocator sequenceAllocator;
 
     @Autowired
     private EntitySessionManager entitySessionManager;
@@ -47,57 +52,64 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
     @Value("${va-partner.dynamic.de-allocation.used-account-cooldown-days.default}")
     private Integer defaultCooldownInDays;
 
-    @SneakyThrows
-    @Transactional(value = Transactional.TxType.REQUIRED, dontRollbackOn = Throwable.class)
     public Account createVirtualAccount(BaseAccountRequestDto request) {
+        return createVirtualAccounts(List.of(request)).get(0);
+    }
 
-        log.info("BaseVirtualAccountRequestDto::[{}]", request);
-        String referenceId = request.getReferenceId();
-        validateReferenceId(referenceId);
+    /**
+     * Builds unsaved accounts for the requests, in request order. Every request is validated before any
+     * sequence is reserved, and each partner config's IDs are reserved in one locked update.
+     * Deliberately not @Transactional: an open transaction here would hold a pooled connection while
+     * the allocator takes a second one, which can exhaust the pool under concurrent requests.
+     */
+    public List<Account> createVirtualAccounts(List<? extends BaseAccountRequestDto> requests) {
+        log.info("Creating {} accounts", requests.size());
+        validateReferenceIds(requests);
 
-        //Generate new account id if account id is not in the request
-        String accountId = request.getAccountId();
-        log.info("ACCOUNT ID::{}", accountId);
-        Account account = null;
-        String partnerId = request.getPartnerId();
-        String virtualAccountId;
-        PartnerAccountConfig config = configService.getPartnerAccountConfig(request.getAccountType(), partnerId);
-        if (StringUtils.isBlank(accountId)) {
-            //PartnerAccountConfig config = configService.getPartnerAccountConfig(request.getAccountType(), partnerId);
-            if (config.isSharedPool()) {
-                //Retrieve shared pool from the db
-                AccountPool accountPool = accountPoolService.findPoolByPrefixSeries(Integer.valueOf(config.getPrefix()));
-                //Check for daily maximum
-                //TODO Check if maximum account for day is reached?
-                virtualAccountId = accountPool.getStartPrefix() + AppUtils.formatEndSequence(accountPool.getCapacity().getReusableDigits(), accountPool.generateSequence());
+        Map<String, PartnerAccountConfig> configsByPartnerAndType = new HashMap<>();
+        Map<Long, List<PendingAccount>> awaitingIdsByConfigId = new LinkedHashMap<>();
+        List<Account> accounts = new ArrayList<>(requests.size());
 
-                //Check if account already exist
-                accountPoolService.saveOrUpdatePool(accountPool);
-            } else {
-                virtualAccountId = config.getPrefix() + AppUtils.formatEndSequence(config.getCapacity().getReusableDigits(), config.generateSequence());
-                configService.update(config);
+        for (BaseAccountRequestDto request : requests) {
+            PartnerAccountConfig config = configsByPartnerAndType.computeIfAbsent(
+                    request.getPartnerId() + "|" + request.getAccountType(),
+                    key -> configService.getPartnerAccountConfig(request.getAccountType(), request.getPartnerId()));
+
+            String accountId = request.getAccountId();
+            if (StringUtils.isNotBlank(accountId)) {
+                validatePartnerSuppliedAccountVirtualAccount(accountId, config);
             }
-
-            if (request instanceof AccountRequestDto) {
-                account = virtualAccountCustomerMapper.dtoToEntity((AccountRequestDto) request);
-                //validate partner name and customer name
-                validatePartnerAndCustomerName(account.getAccountName(), config.getMeta().getDefaultLookupDisplayName());
+            Account account = toAccount(request, config);
+            if (StringUtils.isBlank(accountId)) {
+                awaitingIdsByConfigId.computeIfAbsent(config.getId(), id -> new ArrayList<>())
+                        .add(new PendingAccount(request, account, config));
             } else {
-                account = newAccount(request.getAccountType());
+                buildAccount(request, account, accountId);
             }
-            buildAccount(request, account, virtualAccountId);
-
-        } else {//Validate the account ID in the request.
-            validatePartnerSuppliedAccountVirtualAccount(accountId, config);
-            if (request instanceof AccountRequestDto) {
-                account = virtualAccountCustomerMapper.dtoToEntity((AccountRequestDto) request);
-                validatePartnerAndCustomerName(account.getAccountName(), config.getMeta().getDefaultLookupDisplayName());
-            } else {
-                account = newAccount(request.getAccountType());
-            }
-            buildAccount(request, account, accountId);
+            accounts.add(account);
         }
-        return account;
+
+        // Generate account IDs only once every request is valid
+        for (List<PendingAccount> pending : awaitingIdsByConfigId.values()) {
+            List<String> accountIds = sequenceAllocator.reserveAccountIds(pending.get(0).config(), pending.size());
+            for (int i = 0; i < pending.size(); i++) {
+                buildAccount(pending.get(i).request(), pending.get(i).account(), accountIds.get(i));
+            }
+        }
+        return accounts;
+    }
+
+    private record PendingAccount(BaseAccountRequestDto request, Account account, PartnerAccountConfig config) {
+    }
+
+    private Account toAccount(BaseAccountRequestDto request, PartnerAccountConfig config) {
+        if (request instanceof AccountRequestDto) {
+            Account account = virtualAccountCustomerMapper.dtoToEntity((AccountRequestDto) request);
+            //validate partner name and customer name
+            validatePartnerAndCustomerName(account.getAccountName(), config.getMeta().getDefaultLookupDisplayName());
+            return account;
+        }
+        return newAccount(request.getAccountType());
     }
 
     /*
@@ -148,15 +160,25 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
         account.setInvoiceRef(request.getInvoiceRef());
     }
 
-    private void validateReferenceId(String referenceId) {
-        if (Objects.isNull(referenceId) || Strings.isBlank(referenceId)) {
-            throw new RestServiceException(ErrorCodes.INVALID_OR_EMPTY_ACCOUNT_ID_OR_REFERENCE.getCode(), referenceId);
+    private void validateReferenceIds(List<? extends BaseAccountRequestDto> requests) {
+        for (BaseAccountRequestDto request : requests) {
+            String referenceId = request.getReferenceId();
+            if (Objects.isNull(referenceId) || Strings.isBlank(referenceId)) {
+                throw new RestServiceException(ErrorCodes.INVALID_OR_EMPTY_ACCOUNT_ID_OR_REFERENCE.getCode(), referenceId);
+            }
         }
 
-        AccountCustomer customer = customerRepository.getVirtualAccountFromList(referenceId);
-
-        if (customer != null) {
-            throw new RestServiceException(ErrorCodes.ACCOUNT_ALREADY_EXISTS.getCode(), referenceId);
+        // A reference is taken if it matches an existing reference or account ID
+        Set<String> referenceIds = requests.stream().map(BaseAccountRequestDto::getReferenceId).collect(Collectors.toSet());
+        Set<String> taken = new HashSet<>();
+        for (AccountCustomer customer : customerRepository.findByReferenceIdInOrAccountIdIn(referenceIds, referenceIds)) {
+            taken.add(customer.getReferenceId());
+            taken.add(customer.getAccountId());
+        }
+        for (BaseAccountRequestDto request : requests) {
+            if (taken.contains(request.getReferenceId())) {
+                throw new RestServiceException(ErrorCodes.ACCOUNT_ALREADY_EXISTS.getCode(), request.getReferenceId());
+            }
         }
     }
 
