@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -26,6 +27,11 @@ public class ApplicationConfig {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
     return objectMapper;
+  }
+
+  @Bean
+  public WebClient webClient(WebClient.Builder builder) {
+    return builder.build();
   }
 
 }

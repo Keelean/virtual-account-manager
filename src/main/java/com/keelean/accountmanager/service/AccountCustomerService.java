@@ -5,11 +5,16 @@ import com.keelean.accountmanager.aspect.ActivityLog;
 import com.keelean.accountmanager.dto.AccountCustomerResponseDto;
 import com.keelean.accountmanager.dto.AccountUpdateRequestDto;
 import com.keelean.accountmanager.dto.FullAccountResponseDto;
+import com.keelean.accountmanager.dto.PageableResponse;
 import com.keelean.accountmanager.dto.PartnerConfigResponse;
 import com.keelean.accountmanager.entity.AccountActivity;
 import com.keelean.accountmanager.entity.AccountCustomer;
 import com.keelean.accountmanager.entity.PartnerAccountConfig;
+import com.keelean.accountmanager.enums.AccountMode;
 import com.keelean.accountmanager.enums.AccountStatus;
+import com.keelean.accountmanager.enums.AccountType;
+import com.keelean.accountmanager.exception.ErrorCodes;
+import com.keelean.accountmanager.exception.RestServiceException;
 import com.keelean.accountmanager.repo.AccountActivityRepo;
 import com.keelean.accountmanager.repo.AccountCustomerRepo;
 import lombok.SneakyThrows;
@@ -65,7 +70,7 @@ public class AccountCustomerService {
 
         PartnerConfigResponse partnerConfigResponses = virtualAccountPartnerConfigService.findByPartnerId(customer.getPartnerId(), vc.getMeta().getAccountType());
 
-        if(customer.getMeta().getAccountType() == VirtualAccountMode.DYNAMIC && customer.getMeta().getWaitStartTime() == null){
+        if(customer.getMeta().getAccountType() == AccountType.DYNAMIC && customer.getMeta().getWaitStartTime() == null){
             //Integer expire = request.getTimeoutInMins();
             customer.getMeta().setWaitStartTime(LocalDateTime.now().plus(1440, ChronoUnit.HOURS));
             validatePartnerAndCustomerName(request.getAccountName(), partnerConfigResponses.getPartnerName());
@@ -77,8 +82,8 @@ public class AccountCustomerService {
             customer.getMeta().setAmount(request.getAmount());
             validatePartnerAndCustomerName(request.getAccountName(), partnerConfigResponses.getPartnerName());
             customer.getMeta().setAccountName(request.getAccountName());
-            if(customer.getMode() != null && customer.getMode() == AccountMode.INVOICE){
-                customer.setInvoicePaymentRef(request.getInvoiceRef());
+            if(customer.getMode() != null && (customer.getMode() == AccountMode.STATIC_INVOICE_CLOSED || customer.getMode() == AccountMode.STATIC_INVOICED_EXTENDED)){
+                customer.getMeta().setInvoicePaymentRef(request.getInvoiceRef());
             }
         }
         customer = repo.save(customer);
@@ -101,7 +106,7 @@ public class AccountCustomerService {
         if(customer != null){
             String partnerId = customer.getPartnerId();
             List<PartnerAccountConfig> partnerConfigs = virtualAccountPartnerConfigService.findPartnerConfigByIdentifier(partnerId);
-            Optional<PartnerAccountConfig> optionalPartnerConfig = partnerConfigs.stream().filter(c -> c.getMeta().getMode() == customer.getMeta().getAccountType()).findFirst();
+            Optional<PartnerAccountConfig> optionalPartnerConfig = partnerConfigs.stream().filter(c -> c.getMeta().getAccountType() == customer.getMeta().getAccountType()).findFirst();
 
             if(!optionalPartnerConfig.isPresent()){
                 log.info("Partner config({}) does not exist! Contact admin", partnerId);
@@ -124,7 +129,7 @@ public class AccountCustomerService {
                 status = AccountStatus.EXPIRED.name();
             }
 
-            if(customer.getMeta().getAccountType() == VirtualAccountMode.DYNAMIC && customer.getStatus() == AccountStatus.COMPLETED_UNUSABLE){
+            if(customer.getMeta().getAccountType() == AccountType.DYNAMIC && customer.getStatus() == AccountStatus.COMPLETED_UNUSABLE){
                 status = AccountStatus.COMPLETED_UNUSABLE.name();
             }
 
@@ -133,7 +138,7 @@ public class AccountCustomerService {
                 status = AccountStatus.CREATED.name();
             }
 
-            if(customer.getMeta().getAccountType() == VirtualAccountMode.DYNAMIC &&  customer.getMeta().getWaitStartTime() != null
+            if(customer.getMeta().getAccountType() == AccountType.DYNAMIC &&  customer.getMeta().getWaitStartTime() != null
                     && LocalDateTime.now().compareTo(customer.getMeta().getWaitStartTime()) >= 0){
                 status = AccountStatus.EXPIRED.name();
             }
@@ -163,7 +168,7 @@ public class AccountCustomerService {
         //log.info("VirtualAccountCustomerL::{}", vacr);
         //log.info("VirtualAccountCustomerR::{}", vc);
 
-        if(vc.getMeta().getAccountType() == VirtualAccountMode.DYNAMIC && vc.getMeta().getWaitStartTime() == null){
+        if(vc.getMeta().getAccountType() == AccountType.DYNAMIC && vc.getMeta().getWaitStartTime() == null){
             vacr.setStatus(AccountStatus.EXPIRED.name());
             return vacr;
         }

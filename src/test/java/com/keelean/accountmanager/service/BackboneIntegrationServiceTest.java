@@ -1,5 +1,8 @@
 package com.keelean.accountmanager.service;
 
+// Disabled: BackboneIntegrationService was removed in the account-manager refactor.
+/*
+
 import com.keelean.legacy.accountmanager.config.ApplicationProperties;
 import com.keelean.legacy.accountmanager.constants.JunitConstants;
 import com.keelean.legacy.accountmanager.exception.ErrorCodes;
@@ -24,9 +27,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Optional;
 
-/**
- * @author : Sunil Shivam
- */
+// @author : Sunil Shivam
 @ExtendWith(MockitoExtension.class)
 public class BackboneIntegrationServiceTest {
 
@@ -120,3 +121,4 @@ public class BackboneIntegrationServiceTest {
     }
 
 }
+*/

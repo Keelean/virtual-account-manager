@@ -4,8 +4,14 @@ package com.keelean.accountmanager.service;
 import com.keelean.accountmanager.dto.AccountRequestDto;
 import com.keelean.accountmanager.dto.BaseAccountRequestDto;
 import com.keelean.accountmanager.entity.Account;
+import com.keelean.accountmanager.entity.AccountCustomer;
 import com.keelean.accountmanager.entity.AccountPool;
+import com.keelean.accountmanager.entity.DynamicAccount;
 import com.keelean.accountmanager.entity.PartnerAccountConfig;
+import com.keelean.accountmanager.entity.StaticAccount;
+import com.keelean.accountmanager.enums.AccountType;
+import com.keelean.accountmanager.exception.ErrorCodes;
+import com.keelean.accountmanager.exception.RestServiceException;
 import com.keelean.accountmanager.mapper.AccountCustomerMapper;
 import com.keelean.accountmanager.repo.AccountCustomerRepo;
 import com.keelean.accountmanager.repo.EntitySessionManager;
@@ -26,8 +32,6 @@ import java.util.Objects;
 @Slf4j
 public abstract class AbstractVirtualAccount implements AccountCreationMode {
 
-    @Autowired
-    protected AccountGeneratorService accountGeneratorService;
     @Autowired
     protected PartnerAccountConfigService configService;
     @Autowired
@@ -79,7 +83,7 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
                 //validate partner name and customer name
                 validatePartnerAndCustomerName(account.getAccountName(), config.getMeta().getDefaultLookupDisplayName());
             } else {
-                account = Account.builder().build();
+                account = newAccount(request.getAccountType());
             }
             buildAccount(request, account, virtualAccountId);
 
@@ -89,7 +93,7 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
                 account = virtualAccountCustomerMapper.dtoToEntity((AccountRequestDto) request);
                 validatePartnerAndCustomerName(account.getAccountName(), config.getMeta().getDefaultLookupDisplayName());
             } else {
-                account = Account.builder().build();
+                account = newAccount(request.getAccountType());
             }
             buildAccount(request, account, accountId);
         }
@@ -131,6 +135,10 @@ public abstract class AbstractVirtualAccount implements AccountCreationMode {
         if (!accountId.startsWith(config.getPrefix())) {
             throw new RestServiceException(ErrorCodes.INVALID_ACCOUNT_RANGE.getCode());
         }
+    }
+
+    private Account newAccount(AccountType accountType) {
+        return accountType == AccountType.STATIC ? StaticAccount.builder().build() : DynamicAccount.builder().build();
     }
 
     private void buildAccount(BaseAccountRequestDto request, Account account, String accountId) {
