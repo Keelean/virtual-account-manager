@@ -10,12 +10,15 @@ import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Configuration
@@ -27,6 +30,17 @@ public class ApplicationConfig {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
     return objectMapper;
+  }
+
+  // Error messages live in i18n/message_en.properties; there is no base bundle, so default to English
+  @Bean
+  public MessageSource messageSource() {
+    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+    messageSource.setBasename("i18n/message");
+    messageSource.setDefaultEncoding("UTF-8");
+    messageSource.setFallbackToSystemLocale(false);
+    messageSource.setDefaultLocale(Locale.ENGLISH);
+    return messageSource;
   }
 
   @Bean

@@ -143,7 +143,7 @@ public class PartnerAccountConfigService {
             boolean isMaxDepositValid = maxDeposit >= 10 && maxDeposit <= 100;
 
             if (!isMinDepositValid || !isMaxDepositValid) {
-                throw new RuntimeException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
+                throw new RestServiceException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
             }
 
         }
@@ -254,7 +254,7 @@ public class PartnerAccountConfigService {
         List<PartnerAccountConfig> configs;
 
         if (StringUtils.isBlank(request.getPartnerId())) {
-            throw new RuntimeException(ErrorCodes.INVALID_PARTNER_CODE.getCode(), null);
+            throw new RestServiceException(ErrorCodes.INVALID_PARTNER_CODE.getCode());
         }
         configs = repository.findByPartnerId(request.getPartnerId());
 
@@ -264,16 +264,14 @@ public class PartnerAccountConfigService {
             partnerAccountConfig = createConfig(request);
         } else if (configs.size() >= 2) {
             log.info("Configuration already exist!");
-            //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_ALREADY_EXIST.getCode(), request.getAccountType().name());
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_ALREADY_EXIST.getCode(), request.getAccountType().name());
         } else {
             configs = configs.stream().filter(c -> c.getMeta().getAccountType() == request.getAccountType()).collect(Collectors.toList());
             if (configs.isEmpty()) {
                 partnerAccountConfig = createConfig(request);
             } else {
                 log.info("Configuration already exist2!");
-                //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_ALREADY_EXIST.getCode(), request.getAccountType().name());
-                throw new RuntimeException();
+                throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_ALREADY_EXIST.getCode(), request.getAccountType().name());
             }
 
         }
@@ -292,8 +290,7 @@ public class PartnerAccountConfigService {
         List<PartnerAccountConfig> partnerAccountConfigs;
 
         if (StringUtils.isBlank(partnerConfigCreateRequest.getPartnerId())) {
-            //throw new RestServiceException(ErrorCodes.INVALID_PARTNER_CODE.getCode(), partnerConfigCreateRequest.getPartnerId());
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.INVALID_PARTNER_CODE.getCode(), partnerConfigCreateRequest.getPartnerId());
         }
 
         partnerAccountConfigs = repository.findByPartnerId(partnerConfigCreateRequest.getPartnerId());
@@ -308,8 +305,7 @@ public class PartnerAccountConfigService {
                 partnerAccountConfig = createConfig(partnerConfigCreateRequest);
             } else {
                 log.info("Configuration already exist 2!");
-                //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_ALREADY_EXIST.getCode(), partnerConfigCreateRequest.getAccountType().name());
-                throw new RuntimeException();
+                throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_ALREADY_EXIST.getCode(), partnerConfigCreateRequest.getAccountType().name());
             }
         }
     }
@@ -321,16 +317,14 @@ public class PartnerAccountConfigService {
 
         if (configs.isEmpty()) {
             log.info("Partner config does not exist! Contact admin!");
-            //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
         }
 
         Optional<PartnerAccountConfig> partnerConfigOptional = configs.stream().filter(c -> c.getMeta().getAccountType() == accountType).findFirst();
         log.info("VirtualAccountPartnerConfig22::{}", partnerConfigOptional);
         if (partnerConfigOptional.isEmpty()) {
             log.info("Partner config does not exist! Contact admin!");
-            throw new RuntimeException();
-            //throw new RuntimeException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), String.format("Partner ID=%s, Account mode=%s", partnerId, accountType));
+            throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), String.format("Partner ID=%s, Account mode=%s", partnerId, accountType));
         }
         return partnerConfigOptional.get();
     }

@@ -57,7 +57,7 @@ public class AccountManager {
     public List<BaseAccountResponseDto> createVirtualAccount(WrapperAccountDto<AccountRequestDto> requestDtos){
 
         if(requestDtos.getRequests().size() > MAX_ITEM_SIZE){
-            throw new Exception(String.format("Items size cannot be greater than 100. You have %d items", requestDtos.getRequests().size()));
+            throw new RestServiceException(ErrorCodes.ACCOUNT_LENGTH_VALIDATION.getCode(), MAX_ITEM_SIZE);
         }
         Set<AccountRequestDto> requestDtoSet = new HashSet<>(requestDtos.getRequests());
 
@@ -97,7 +97,7 @@ public class AccountManager {
     public List<BaseAccountResponseDto> processParallelyWithExecutorService(WrapperAccountDto<BaseAccountRequestDto> requestDtos) {
 
         if(requestDtos.getRequests().size() > MAX_ITEM_SIZE){
-            throw new Exception(String.format("Items size cannot be greater than 100. You have %d items", requestDtos.getRequests().size()));
+            throw new RestServiceException(ErrorCodes.ACCOUNT_LENGTH_VALIDATION.getCode(), MAX_ITEM_SIZE);
         }
         Set<BaseAccountRequestDto> requestDtoSet = new HashSet<>(requestDtos.getRequests());
 
@@ -154,7 +154,7 @@ public class AccountManager {
     public List<BaseAccountResponseDto> processParallelyWithExecutorServicess(WrapperAccountDto<BaseAccountRequestDto> requestDtos) {
 
         if(requestDtos.getRequests().size() > MAX_ITEM_SIZE){
-            throw new Exception(String.format("Items size cannot be greater than 100. You have %d items", requestDtos.getRequests().size()));
+            throw new RestServiceException(ErrorCodes.ACCOUNT_LENGTH_VALIDATION.getCode(), MAX_ITEM_SIZE);
         }
         Set<BaseAccountRequestDto> requestDtoSet = new HashSet<>(requestDtos.getRequests());
 
@@ -251,8 +251,7 @@ public class AccountManager {
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.info("Bulk creation::{}", e.getMessage());
-                    //throw new RestServiceException(e.getMessage(), e.getLocalizedMessage());
-                    throw new RuntimeException();
+                    throw e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e);
                 }
             });
             return virtualAccounts;

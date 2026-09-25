@@ -23,6 +23,9 @@ public class ApplicationProperties {
 
     @NotNull
     private String switchName;
+
+    // Include exception details in error responses (devErrorMessage); keep off outside development
+    private boolean injectDevErrorMessage;
     
 
     @Data

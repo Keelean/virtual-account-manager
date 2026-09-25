@@ -55,13 +55,11 @@ public class AccountCustomerService {
 
        if(customer == null){
            log.info("Account ID({}) does not exist!", accountId);
-           //throw new RestServiceException(ErrorCodes.ACCOUNT_DOES_NOT_EXIST.getCode(), accountId);
-           throw new RuntimeException();
+           throw new RestServiceException(ErrorCodes.ACCOUNT_DOES_NOT_EXIST.getCode(), accountId);
        }
 
        if(!partnerId.equals(customer.getPartnerId())){
-           //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), accountId);
-           throw new RuntimeException();
+           throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), accountId);
        }
 
         if(request.getAmount().compareTo(BigDecimal.ZERO) > 0){
@@ -110,8 +108,7 @@ public class AccountCustomerService {
 
             if(!optionalPartnerConfig.isPresent()){
                 log.info("Partner config({}) does not exist! Contact admin", partnerId);
-                //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
-                throw new RuntimeException();
+                throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
             }
 
             PartnerAccountConfig partnerConfig = optionalPartnerConfig.get();
@@ -262,19 +259,16 @@ public class AccountCustomerService {
         AccountCustomer customer = repo.getVirtualAccountFromList(referenceIdOrAccountId);
         if(Objects.isNull(customer)){
             log.info("Virtual account({}) does not exist", referenceIdOrAccountId);
-            //throw new RestServiceException(ErrorCodes.ACCOUNT_DOES_NOT_EXIST.getCode(), referenceIdOrAccountId);
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.ACCOUNT_DOES_NOT_EXIST.getCode(), referenceIdOrAccountId);
         }
 
         if(Objects.isNull(customer.getExpiryDate())){
             log.info("Virtual account({}) configuration is incomplete", referenceIdOrAccountId);
-            //throw new RestServiceException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.INCOMPLETE_OR_WRONG_CONFIGURATION.getCode());
         }
 
         if(!partnerId.equals(customer.getPartnerId())){
-            //throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.PARTNER_CONFIG_DOES_NOT_EXIST.getCode(), partnerId);
         }
 
         customer.setExpiryDate(LocalDateTime.now());
@@ -292,8 +286,7 @@ public class AccountCustomerService {
     private void validatePartnerAndCustomerName(String accountName, String partnerName) {
 
         if(Objects.isNull(accountName)){
-            //throw new RestServiceException(ErrorCodes.VALIDATION_FAILED.getCode(), partnerName);
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.VALIDATION_FAILED.getCode(), partnerName);
         }
 
         log.info("partnerName::{}",partnerName);
@@ -303,14 +296,12 @@ public class AccountCustomerService {
 
         if(!accountName.startsWith(partnerName)){
             log.info("{} must contain {} as a prefix or suffix", accountName, partnerName);
-            //throw new RestServiceException(ErrorCodes.ACCOUNT_NAME_VALIDATION_FAILED.getCode(), accountName, partnerName);
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.ACCOUNT_NAME_VALIDATION_FAILED.getCode(), accountName, partnerName);
         }
 
         if(accountName.length() > 30){
             log.info("{} must contain is more than 30 characters long",accountName);
-            //throw new RestServiceException(ErrorCodes.ACCOUNT_LENGTH_VALIDATION.getCode(), accountName);
-            throw new RuntimeException();
+            throw new RestServiceException(ErrorCodes.ACCOUNT_LENGTH_VALIDATION.getCode(), accountName);
         }
     }
 
