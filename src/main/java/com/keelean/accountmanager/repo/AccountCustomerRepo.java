@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,8 @@ import java.util.Optional;
 public interface AccountCustomerRepo extends JpaRepository<AccountCustomer, Long> {
 
     List<AccountCustomer> findByReferenceIdOrAccountId(String referenceId, String accountId);
+
+    List<AccountCustomer> findByReferenceIdInOrAccountIdIn(Collection<String> referenceIds, Collection<String> accountIds);
 
     @Query(value = "SELECT * FROM virtual_account_customer WHERE reference_id = :referenceId OR account_id = :accountId AND meta->>'mode' = :mode", nativeQuery = true)
     List<AccountCustomer> findByReferenceIdOrAccountIdAndMode(@Param("referenceId") String referenceId, @Param("accountId") String accountId, @Param("mode") String mode);

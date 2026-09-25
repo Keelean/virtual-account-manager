@@ -1,27 +1,27 @@
 package com.keelean.accountmanager.service;
 
 
-import com.keelean.accountmanager.dto.BaseAccountRequestDto;
 import com.keelean.accountmanager.dto.BaseAccountResponseDto;
 import com.keelean.accountmanager.entity.Account;
-
-import java.util.Collections;
-import java.util.List;
+import com.keelean.accountmanager.entity.AccountCustomer;
 
 public interface AccountCreationMode {
 
     default BaseAccountResponseDto preCreation(Account virtualAccount){
         return BaseAccountResponseDto.builder().build();
     }
-    default List<BaseAccountResponseDto> preCreationBulkMode(List<BaseAccountRequestDto> requestDtos){
-        return Collections.emptyList();
-    }
 
     default BaseAccountResponseDto singleFullCreation(Account virtualAccountCustomer){
         return BaseAccountResponseDto.builder().build();
     }
 
-    default List<BaseAccountResponseDto> preCreation(List<Account> virtualAccounts){
-        return Collections.emptyList();
+    // The unsaved row singleFullCreation stores; bulk requests save these together in one transaction
+    default AccountCustomer toFullCustomer(Account virtualAccount){
+        throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support full creation");
+    }
+
+    // The unsaved row preCreation stores; bulk requests save these together in one transaction
+    default AccountCustomer toPreCreatedCustomer(Account virtualAccount){
+        throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support pre-creation");
     }
 }

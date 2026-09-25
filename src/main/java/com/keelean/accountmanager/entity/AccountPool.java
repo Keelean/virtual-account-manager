@@ -55,21 +55,17 @@ public class AccountPool extends AbstractBaseAuditableEntity {
         return capacity == AccountCapacity.SHARED_POOL_1 || capacity == AccountCapacity.SHARED_POOL_10;
     }
 
-    //generate sequence for shared pool
-    public synchronized int generateSequence() {
-        if (isSharedPool()) {
-            if (isNextSequenceAvailable() && isOpen()) {
-                return ++this.currentSequence;
-            } else {
-                throw new IllegalArgumentException("Maximum sequence reached");
-            }
+    // Reserves count consecutive shared-pool sequences and returns the first; the caller must hold the row lock
+    public int reserveSequences(int count) {
+        if (!isSharedPool()) {
+            throw new IllegalArgumentException("Shared pool cannot generate sequence for dedicated pool.");
         }
-        throw new IllegalArgumentException("Shared pool cannot generate sequence for dedicated pool.");
-    }
-
-    private boolean isNextSequenceAvailable() {
-        int newSequence = this.currentSequence;
-        return ++newSequence < getMaximumSequence();
+        if (this.currentSequence + count >= getMaximumSequence() || !isOpen()) {
+            throw new IllegalArgumentException("Maximum sequence reached");
+        }
+        int first = this.currentSequence + 1;
+        this.currentSequence += count;
+        return first;
     }
 
     private Integer getMaximumSequence() {

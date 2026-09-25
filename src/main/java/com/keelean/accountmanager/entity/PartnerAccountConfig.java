@@ -40,20 +40,17 @@ public class PartnerAccountConfig extends AbstractBaseAuditableEntity {
         return Integer.parseInt("9".repeat(getCapacity().getReusableDigits()));
     }
 
-    private boolean isNextSequenceAvailable() {
-        int newSequence = this.currentSequence;
-        return ++newSequence < getMaximumSequence();
-    }
-
-    public synchronized int generateSequence() {
-        if (!isSharedPool()) {
-            if (isNextSequenceAvailable()) {
-                return ++this.currentSequence;
-            } else {
-                throw new IllegalArgumentException("Maximum sequence reached");
-            }
+    // Reserves count consecutive sequences and returns the first; the caller must hold the row lock
+    public int reserveSequences(int count) {
+        if (isSharedPool()) {
+            throw new IllegalArgumentException("Partners cannot generate sequence for shared pool.");
         }
-        throw new IllegalArgumentException("Partners cannot generate sequence for shared pool.");
+        if (this.currentSequence + count >= getMaximumSequence()) {
+            throw new IllegalArgumentException("Maximum sequence reached");
+        }
+        int first = this.currentSequence + 1;
+        this.currentSequence += count;
+        return first;
     }
 
     public boolean isSharedPool() {
